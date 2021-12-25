@@ -6,10 +6,13 @@ app = Flask(__name__)
 api = overpass.API()
 
 mapRequest = '(\
-                node(poly: "%(poly)s");\
-                relation(poly: "%(poly)s");\
-                <;\
-                >;\
+                way\
+                (poly: "%(poly)s")\
+                ["highway"~"primary|residential|tertiary|unclassified"];\
+                (\
+                    ._;\
+                    >;\
+                );\
                );'
 
 @app.route('/polygon', methods=['POST'])
