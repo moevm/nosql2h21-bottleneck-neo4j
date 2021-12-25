@@ -11,9 +11,14 @@ html, body {
     height: 100%;
 }
 
-#my-listbox {
-    top: auto;
-    left: auto;
+span {
+    pointer-events: none;
+    opacity: 0.6;
+    widht: 200px;
+    height: 100px;
+    alignment: center;
+    background-color: cadetblue;
+    z-index: 1;
 }
 
 p {
