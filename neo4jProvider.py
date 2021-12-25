@@ -1,6 +1,5 @@
 from typing import Dict, List
 from neo4j import GraphDatabase
-import json
 
 class Neo4jProvider():
     def __init__(self, uri, user, password):
