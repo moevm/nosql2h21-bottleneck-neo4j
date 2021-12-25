@@ -61,7 +61,7 @@ function SendRequest(r_method, r_path, r_args, r_handler)
 
     if (r_method.toLowerCase() == "post")
     {
-        Request.setRequestHeader("Content-Type","application/x-www-form-urlencoded; charset=utf-8");
+        Request.setRequestHeader("Content-Type","json; charset=utf-8");
         Request.send(r_args);
     }
     else
