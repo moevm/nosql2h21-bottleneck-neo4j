@@ -1,11 +1,24 @@
-html {
-    margin: 0px;
-    height: 100%;
+html, body {
     width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    font-family: Arial;
 }
 
-body {
+#map {
+    widht: 100%;
+    height: 100%;
+}
+
+#my-listbox {
+    top: auto;
+    left: auto;
+}
+
+p {
+    font-family: Sans-Serif;
+    font-size: 12px;
+    padding: 12px 0px 12px 10px;
     margin: 0px;
-    min-height: 100%;
-    width: 100%;
 }
