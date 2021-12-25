@@ -74,15 +74,3 @@ function GetBottlenecks(Polygon, Handler)
 {
     SendRequest("POST", "http://26.101.20.117:8080/polygon", Polygon, Handler);
 }
-
-function GetBottlenecksAjax(arg, handler) {
-    $.ajax({
-        type: "POST",
-        url: "http://26.101.20.117:8080/polygon",
-        data: arg.serialize(),
-        success: handler(response),
-        error: function (error) {
-            console.log(error);
-        }
-    });
-}

@@ -43,11 +43,11 @@ ymaps.ready(['ext.paintOnMap']).then(function () {
                 ]
             }
             var JSON_COORDS = JSON.stringify(COORD);
+            map.geoObjects.removeAll();
+            map.geoObjects.add(geoObject);
             GetBottlenecks(JSON_COORDS, function(Response){
                 console.log(Response);
             })
-            map.geoObjects.removeAll();
-            map.geoObjects.add(geoObject);
         }
     });
 
