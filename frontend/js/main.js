@@ -6,15 +6,11 @@ ymaps.ready(['ext.paintOnMap']).then(function () {
     });
 
     var paintProcess;
-
-    // Опции многоугольника или линии.
     var styles = {strokeColor: '#0000ff', strokeOpacity: 0.5, strokeWidth: 3, fillColor: '#0000ff', fillOpacity: 0.2};
-
     var button = new ymaps.control.Button({data: {content: 'Режим выделеия'}, options: {maxWidth: 150}});
     map.controls.add(button);
 
     map.events.add('mousedown', function (e) {
-        // Если кнопка мыши была нажата с зажатой клавишей "alt", то начинаем рисование контура.
         if (e.get('altKey') || button.isSelected()) {
             paintProcess = ymaps.ext.paintOnMap(map, e, {style: styles});
         }
