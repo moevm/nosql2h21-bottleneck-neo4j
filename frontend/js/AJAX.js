@@ -39,9 +39,22 @@ function SendRequest(r_method, r_path, r_args, r_handler)
     {
         if (Request.readyState == 4)
         {
-            r_handler(Request);
+            if (Request.status == 200)
+            {
+                r_handler(Request);
+            }
+            else
+            {
+                console.log("Error:", Request.status);
+            }
         }
+        else
+        {
+            console.log("Succes");
+        }
+
     }
+
     if (r_method.toLowerCase() == "get" && r_args.length > 0)
         r_path += "?" + r_args;
     Request.open(r_method, r_path, true);
@@ -55,4 +68,21 @@ function SendRequest(r_method, r_path, r_args, r_handler)
     {
         Request.send(null);
     }
+}
+
+function GetBottlenecks(Polygon, Handler)
+{
+    SendRequest("POST", "http://26.101.20.117:8080/polygon", Polygon, Handler);
+}
+
+function GetBottlenecksAjax(arg, handler) {
+    $.ajax({
+        type: "POST",
+        url: "http://26.101.20.117:8080/polygon",
+        data: arg.serialize(),
+        success: handler(response),
+        error: function (error) {
+            console.log(error);
+        }
+    });
 }

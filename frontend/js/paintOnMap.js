@@ -13,35 +13,6 @@ ymaps.modules.define('ext.paintOnMap', ['meta', 'util.extend', 'pane.EventsPane'
         throw new Error('(ymaps.ext.paintOnMap) некорректный вызов PaintingProcess#finishPaintingAt. Рисование уже завершено.');
     };
 
-    /**
-     * @interface ymaps.ext.paintOnMap.PaintingProcess
-     */
-
-    /**
-     * Отключает режим рисования.
-     * @function
-     * @name ymaps.ext.paintOnMap.PaintingProcess#finishPaintingAt
-     * @param {Number[]|ymaps.Event} [positionOrEvent] Координаты точки, в которой рисование должно закончиться.
-     * Координаты задаются в пикселях относительно верхнего левого угла карты.
-     * @return {Number[]} Координаты.
-     */
-
-    /**
-     * Включает режим рисования.
-     * @name ymaps.ext.paintOnMap
-     * @param {ymaps.Map} map
-     * @param {Number[]|ymaps.Event} [positionOrEvent] Координаты точки, в которой рисование должно закончиться.
-     * Координаты задаются в пикселях относительно верхнего левого угла карты.
-     * @param {Object} [config]
-     * @param {String[]|null} [config.unwantedBehaviors] Список поведений карты, которые должны быть выключены во время
-     * рисования. Перетаскивание карты и её масштабирование колесом мыши выключены по умолчанию.
-     * @param {Object} [config.style] Стили такие же, как в ymaps.Polygon или ymaps.Polyline.
-     * @param {String} [config.style.strokeColor='#0000ff'] Цвет линии или обводки.
-     * @param {Number} [config.style.strokeWidth=1] Толщина линии или обводки.
-     * @param {Number} [config.style.strokeOpacity=1] Прозрачность линии или обводки.
-     * @param {Number} [config.tolerance=16] Уровень упрощения координат в пикселях.
-     * @returns {ymaps.ext.paintOnMap.PaintingProcess} Процесс рисования.
-     */
     function paintOnMap(map, positionOrEvent, config) {
         config = config || {};
         var style = extend(DEFAULT_STYLE, config.style || {});

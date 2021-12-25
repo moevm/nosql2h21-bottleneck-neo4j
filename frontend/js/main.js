@@ -26,7 +26,7 @@ ymaps.ready(['ext.paintOnMap']).then(function () {
             paintProcess = ymaps.ext.paintOnMap(map, e, {style: styles});
         }
     });
-
+    var lastGeoObject;
     // Подпишемся на событие отпускания кнопки мыши.
     map.events.add('mouseup', function (e) {
         if (paintProcess) {
@@ -34,7 +34,7 @@ ymaps.ready(['ext.paintOnMap']).then(function () {
             // Получаем координаты отрисованного контура.
             var coordinates = paintProcess.finishPaintingAt(e);
             paintProcess = null;
-            var geoObject = new ymaps.Polygon([coordinates], {}, styles[currentIndex]);
+            var geoObject = new ymaps.Polygon([coordinates], {}, styles);
             var COORD = [];
             for(var i = 0; i < coordinates.length; i++){
                 COORD[i] = [
@@ -43,7 +43,10 @@ ymaps.ready(['ext.paintOnMap']).then(function () {
                 ]
             }
             var JSON_COORDS = JSON.stringify(COORD);
-            console.log(JSON_COORDS);
+            GetBottlenecks(JSON_COORDS, function(Response){
+                console.log(Response);
+            })
+            map.geoObjects.removeAll();
             map.geoObjects.add(geoObject);
         }
     });
