@@ -12,6 +12,7 @@ mapRequest = '(\
                 way\
                 (poly: "%(poly)s")\
                 ["highway"~"primary|secondary|residential|tertiary|unclassified"];\
+                node(w);\
                );'
 
 @app.route('/polygon', methods=['POST'])
@@ -22,9 +23,11 @@ def getByPolygon():
         if(data):
             points = ["%f %f" % tuple(point) for point in data]
         
-        rawGraph = api.get(mapRequest % {"poly": (" ").join(points)}, verbosity='geom')
+        rawGraph = api.get(mapRequest % {"poly": (" ").join(points)}, verbosity='tags body',
+                           responseformat="json")
         return json.dumps(bottleNeckFinder.graduateLines(rawGraph), ensure_ascii=False), 200
-    except Exception:
+    except Exception as e:
+        print(e)
         return "", 400
 
 if __name__ == "__main__":
