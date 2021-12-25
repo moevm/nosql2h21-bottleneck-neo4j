@@ -1,12 +1,10 @@
-import json
 import random
+from neo4jProvider import Neo4jProvider, writeRawGraph
+
+provider = Neo4jProvider("bolt://26.101.20.117:7687", "neo4j", "123")
 
 def graduateLines(rawGraph):
-    with open("graph.json", "w", encoding="utf-8") as file:
-        json.dump(rawGraph, file, indent=4, ensure_ascii=False)
+    lines = [{"points": line, "load": random.random()} 
+             for line in writeRawGraph(provider,rawGraph)]
 
-    lines = []
-    for line in rawGraph["features"]:
-        points = [list(reversed(coord)) for coord in line["geometry"]["coordinates"]]
-        lines.append({"points": points, "load": random.random()})
     return lines

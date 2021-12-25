@@ -6,6 +6,9 @@ class Neo4jProvider():
     def __init__(self, uri, user, password):
         self.driver = GraphDatabase.driver(uri, auth=(user, password))
 
+    def __del__(self):
+        self.driver.close()
+
     def close(self):
         self.driver.close()
 
@@ -33,7 +36,9 @@ class Neo4jProvider():
             except:
                 pass
             
-            session.write_transaction(self.__createLine, id, lanes, maxSpeed, line["nodes"])
+            return session.write_transaction(self.__createLine, id, lanes, maxSpeed, line["nodes"])
+
+
 
     @staticmethod
     def __createPoint(context, id:int, lat: float, lon: float, isTrafficSignal: bool = False):
@@ -53,30 +58,33 @@ class Neo4jProvider():
                     "       line.lanes=$lanes, "
                     "       line.maxSpeed=$maxSpeed ",
                     id=id, lanes=lanes, maxSpeed=maxSpeed)
+        points = []
         
         for pointId in nodes:
-            Neo4jProvider.__addRelation(context, id, pointId)
+            points.append(list(Neo4jProvider.__addRelation(context, id, pointId)))
+        
+        return points
             
     @staticmethod
     def __addRelation(context, lineId: int, pointId: int):
-        context.run("MATCH (point:Point {id: $pointId}), "
-                    "      (line:Line {id: $lineId}) "
-                    "MERGE (point)-[:included]->(line) "
-                    "MERGE (line)-[:contains]->(point) ",
-                    pointId=pointId, lineId=lineId)
+        result = context.run("MATCH (point:Point {id: $pointId}), "
+                             "      (line:Line {id: $lineId}) "
+                             "MERGE (point)-[:included]->(line) "
+                             "MERGE (line)-[:contains]->(point) "
+                             "RETURN point.lat, point.lot",
+                             pointId=pointId, lineId=lineId)
+        return result.single()
 
-if __name__ == '__main__':
-    provider = Neo4jProvider("bolt://localhost:7687", "neo4j", "123")
+def writeRawGraph(provider, rawGraph):
+    lines = []
 
-    with open("graph.json", 'r', encoding='utf-8') as file:
-        rawGraph = json.load(file,)
-        for node in rawGraph["elements"]:
+    for node in rawGraph["elements"]:
             try:
                 if node["type"] == "node":
                     provider.writePoint(node)
                 elif node["type"] == "way":
-                    provider.writeLine(node)
+                    lines.append(provider.writeLine(node))
             except:
                 continue
-
-    provider.close()
+    
+    return lines
