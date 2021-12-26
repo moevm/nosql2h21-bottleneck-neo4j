@@ -1,5 +1,7 @@
+import random
 from typing import Dict, List
 from neo4j import GraphDatabase
+
 
 class Neo4jProvider():
     def __init__(self, uri, user, password):
@@ -37,7 +39,26 @@ class Neo4jProvider():
             
             return session.write_transaction(self.__createLine, id, lanes, maxSpeed, line["nodes"])
 
+    def getLine(self, line: Dict):
+        with self.driver.session() as session:
+            id = line["id"]
 
+            return session.write_transaction(self.__getLine, id)
+
+    @staticmethod
+    def __getLine(context, id:int):
+        results = context.run("MATCH (line:Line {id:$id})-[rel:contains]->(point:Point)"
+                              "RETURN rel.number, line.load, point.lat, point.lon", id=id)
+        points = []
+        load = 0
+        for point in sorted(list(results)):
+            points.append(list(point[2::]))
+            load = point[1]
+
+        if len(points) > 0:
+            return {"points": points, "load": load}
+        else:
+            return None
 
     @staticmethod
     def __createPoint(context, id:int, lat: float, lon: float, isTrafficSignal: bool = False):
@@ -51,39 +72,31 @@ class Neo4jProvider():
 
     @staticmethod
     def __createLine(context, id:int, lanes: int, maxSpeed: int, nodes: List,):
-        context.run("MERGE (line:Line {id: $id, lanes: $lanes, maxSpeed: $maxSpeed}) "
-                    "ON MATCH "
-                    "   SET "
-                    "       line.lanes=$lanes, "
-                    "       line.maxSpeed=$maxSpeed ",
-                    id=id, lanes=lanes, maxSpeed=maxSpeed)
+        result = context.run("MERGE (line:Line {id: $id, lanes: $lanes, maxSpeed: $maxSpeed, load: $load}) "
+                             "ON MATCH "
+                             "   SET "
+                             "       line.lanes=$lanes, "
+                             "       line.maxSpeed=$maxSpeed, "
+                             "       line.load=$load "
+                             "RETURN line.load",
+                    id=id, lanes=lanes, maxSpeed=maxSpeed, load=random.random())
         points = []
         
+        number = 0
         for pointId in nodes:
-            points.append(list(Neo4jProvider.__addRelation(context, id, pointId)))
+            points.append(list(Neo4jProvider.__addRelation(context, id, pointId, number)))
+            number += 1
         
-        return points
+        return {"points": points, "load": result.single()}
             
     @staticmethod
-    def __addRelation(context, lineId: int, pointId: int):
+    def __addRelation(context, lineId: int, pointId: int, number: int):
         result = context.run("MATCH (point:Point {id: $pointId}), "
                              "      (line:Line {id: $lineId}) "
                              "MERGE (point)-[:included]->(line) "
-                             "MERGE (line)-[:contains]->(point) "
-                             "RETURN point.lat, point.lot",
-                             pointId=pointId, lineId=lineId)
+                             "MERGE (line)-[:contains {number:$number}]->(point) "
+                             "RETURN point.lat, point.lon",
+                             pointId=pointId, lineId=lineId, number=number)
+
         return result.single()
-
-def writeRawGraph(provider, rawGraph):
-    lines = []
-
-    for node in rawGraph["elements"]:
-            try:
-                if node["type"] == "node":
-                    provider.writePoint(node)
-                elif node["type"] == "way":
-                    lines.append(provider.writeLine(node))
-            except:
-                continue
     
-    return lines

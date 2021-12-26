@@ -1,4 +1,4 @@
 flask_cors
-flask
+flask[async]
 overpass
 neo4j
