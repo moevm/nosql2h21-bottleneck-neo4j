@@ -1,5 +1,7 @@
 from typing import Dict, List
 from neo4j import GraphDatabase
+from datetime import datetime
+import time
 
 class Neo4jProvider():
     def __init__(self, uri, user, password):
@@ -77,6 +79,8 @@ class Neo4jProvider():
 def writeRawGraph(provider, rawGraph):
     lines = []
 
+    start_time = datetime.now()
+
     for node in rawGraph["elements"]:
             try:
                 if node["type"] == "node":
@@ -85,5 +89,7 @@ def writeRawGraph(provider, rawGraph):
                     lines.append(provider.writeLine(node))
             except:
                 continue
+
+    print(datetime.now() - start_time)
     
     return lines
