@@ -8,3 +8,6 @@ def graduateLines(rawGraph):
              for line in writeRawGraph(provider,rawGraph)]
 
     return lines
+
+def getVerdict(rawGraph):
+    return graduateLines(rawGraph)

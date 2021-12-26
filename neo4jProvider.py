@@ -72,7 +72,7 @@ class Neo4jProvider():
                              "      (line:Line {id: $lineId}) "
                              "MERGE (point)-[:included]->(line) "
                              "MERGE (line)-[:contains]->(point) "
-                             "RETURN point.lat, point.lot",
+                             "RETURN point.lat, point.lon",
                              pointId=pointId, lineId=lineId)
         return result.single()
 

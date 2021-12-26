@@ -15,7 +15,7 @@ mapRequest = '(\
                 node(w);\
                );'
 
-@app.route('/polygon', methods=['POST'])
+@app.route('/import', methods=['POST'])
 def getByPolygon():
     try:
         data = json.loads(request.get_data())
@@ -26,6 +26,21 @@ def getByPolygon():
         rawGraph = api.get(mapRequest % {"poly": (" ").join(points)}, verbosity='tags body',
                            responseformat="json")
         return json.dumps(bottleNeckFinder.graduateLines(rawGraph), ensure_ascii=False), 200
+    except Exception as e:
+        print(e)
+        return "", 400
+
+@app.route('/polygon', methods=['POST'])
+def getByPolygon():
+    try:
+        data = json.loads(request.get_data())
+        points = []
+        if(data):
+            points = ["%f %f" % tuple(point) for point in data]
+        
+        rawGraph = api.get(mapRequest % {"poly": (" ").join(points)}, verbosity='tags body',
+                           responseformat="json")
+        return json.dumps(bottleNeckFinder.getVerdict(rawGraph), ensure_ascii=False), 200
     except Exception as e:
         print(e)
         return "", 400
