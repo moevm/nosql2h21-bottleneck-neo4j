@@ -25,6 +25,40 @@ class Neo4jProvider():
                 pass
 
             session.write_transaction(self.__createPoint, id, lat, lon, isTrafficSignal)
+    
+    def haveLine(self, line):
+        with self.driver.session() as session:
+            id = line["id"]
+
+            return session.write_transaction(self.__haveLine, id)
+    
+    @staticmethod
+    def __haveLine(context, id:int):
+        result = context.run("MATCH (line:Line {id:$id})"
+                              "RETURN line.id", id=id)
+
+        if len(result.single()) > 0:
+            return True
+        else:
+            return False
+
+    def updateLoad(self):
+        with self.driver.session() as session:
+            session.write_transaction(self.__updateLoad)
+
+    @staticmethod
+    def __updateLoad(context):
+        context.run("match (l:Line) "
+                    "set l.load = $basicLoad", basicLoad=0)
+
+        context.run("match (l:Line)-[:contains]->(p:Point) "
+                    "where p.isTrafficSignal = true "
+                    "set l.load = l.load + $weight", weight=0.1)
+        
+        context.run("match (l1:Line)-[:contains]->(p:Point) "
+                    "match (p)-[:included]->(l2:Line) "
+                    "where l1.id <> l2.id and l1.lanes > l2.lanes "
+                    "set l1.load = l1.load + $weight", weight=0.4)
 
     def writeLine(self, line: Dict):
         with self.driver.session() as session:
