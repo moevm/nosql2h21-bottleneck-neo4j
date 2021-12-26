@@ -41,12 +41,13 @@ function SendRequest(r_method, r_path, r_args, r_handler)
         {
             if (Request.status == 200)
             {
-                console.log("Response received, control transferred to", r_handler);
+                console.log("Response received, control transferred to ", r_handler);
                 r_handler(Request);
             }
             else
             {
                 console.log("Error:", Request.status);
+                alert("Error! Error code:", Request.status)
             }
         }
         else
