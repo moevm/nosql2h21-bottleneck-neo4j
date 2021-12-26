@@ -1,9 +1,8 @@
 import overpass
-from neo4jProvider import Neo4jProvider, writeRawGraph, getGraduation
+from neo4jProvider import Neo4jProvider
 from datetime import datetime
-
 provider = Neo4jProvider("bolt://localhost:7687", "neo4j", "123")
-api = overpass.API()
+api = overpass.API(endpoint="https://overpass.kumi.systems/api/interpreter")
 
 def graduateLines(points):
     mapRequest = '(\
@@ -33,37 +32,34 @@ def getVerdict(points):
 
 def writeRawGraph(rawGraph):
     start_time = datetime.now()
+    lines = []
 
     for node in rawGraph["elements"]:
             try:
                 if node["type"] == "node":
                     provider.writePoint(node)
                 elif node["type"] == "way":
-                    provider.writeLine(node)
+                   lines.append(provider.writeLine(node))
             except:
                 continue
 
-    print("%s consumed to write %d nodes" % (datetime.now() - start_time, len(rawGraph["elements"])))
+    print("%s consumed to write %d lines" % (datetime.now() - start_time, len(lines)))
+
+    return lines
     
-def writeLine(nodeId):
+def writeAndGetLines(nodeIds):
     mapRequest = '(\
-                way(id:%d)\
+                way(id:%s);\
                 node(w);\
                );'
-    rawGraph = api.get(mapRequest % nodeId, verbosity='tags body',
+    rawGraph = api.get(mapRequest % ", ".join(nodeIds), verbosity='tags body',
                            responseformat="json")
     
-    for node in rawGraph["elements"]:
-            try:
-                if node["type"] == "node":
-                    provider.writePoint(node)
-                elif node["type"] == "way":
-                    return provider.writeLine(node)
-            except:
-                continue
+    return writeRawGraph(rawGraph)
     
 def getGraduation(rawGraph):
     lines = []
+    linestoWrite = []
 
     start_time = datetime.now()
 
@@ -73,10 +69,13 @@ def getGraduation(rawGraph):
                 if line:
                     lines.append(line)
                 else:
-                    lines.append(writeLine(line["id"]))
+                    linestoWrite.append(str(node["id"]))
             except:
                 continue
 
-    print("%s consumed to read %d nodes" % (datetime.now() - start_time, len(rawGraph["elements"])))
+    print("%s consumed to read %d lines" % (datetime.now() - start_time, len(lines)))
+
+    if len(linestoWrite) > 0:
+        lines.extend(writeAndGetLines(linestoWrite))
     
     return lines

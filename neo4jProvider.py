@@ -43,11 +43,22 @@ class Neo4jProvider():
         with self.driver.session() as session:
             id = line["id"]
 
-            return session.write_transaction(self.__createLine, id)
+            return session.write_transaction(self.__getLine, id)
 
     @staticmethod
     def __getLine(context, id:int):
-        context.run("")
+        results = context.run("MATCH (line:Line {id:$id})-[:contains]->(point:Point)"
+                              "RETURN line.load, point.lat, point.lon", id=id)
+        points = []
+        load = 0
+        for point in results:
+            points.append(list(point[1::]))
+            load = point[0]
+
+        if len(points) > 0:
+            return {"points": points, "load": load}
+        else:
+            return None
 
     @staticmethod
     def __createPoint(context, id:int, lat: float, lon: float, isTrafficSignal: bool = False):
@@ -84,5 +95,6 @@ class Neo4jProvider():
                              "MERGE (line)-[:contains]->(point) "
                              "RETURN point.lat, point.lon",
                              pointId=pointId, lineId=lineId)
+
         return result.single()
     

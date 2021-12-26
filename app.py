@@ -6,13 +6,6 @@ import bottleNeckFinder
 app = Flask(__name__)
 CORS(app)
 
-mapRequest = '(\
-                way\
-                (poly: "%(poly)s")\
-                ["highway"~"primary|secondary|residential|tertiary|unclassified"];\
-                node(w);\
-               );'
-
 @app.route('/import', methods=['POST'])
 async def importByPolygon():
     try:
