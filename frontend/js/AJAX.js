@@ -41,6 +41,7 @@ function SendRequest(r_method, r_path, r_args, r_handler)
         {
             if (Request.status == 200)
             {
+                console.log("Response received, control transferred to", r_handler);
                 r_handler(Request);
             }
             else
@@ -50,7 +51,7 @@ function SendRequest(r_method, r_path, r_args, r_handler)
         }
         else
         {
-            console.log("Succes");
+            console.log("Awaiting response from ", r_path);
         }
 
     }
@@ -68,9 +69,4 @@ function SendRequest(r_method, r_path, r_args, r_handler)
     {
         Request.send(null);
     }
-}
-
-function GetBottlenecks(Polygon, Handler)
-{
-    SendRequest("POST", "http://26.101.20.117:8080/polygon", Polygon, Handler);
 }
