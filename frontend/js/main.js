@@ -7,7 +7,8 @@ ymaps.ready(['ext.paintOnMap']).then(function () {
 
     var paintProcess;
     var styles = {strokeColor: '#0000ff', strokeOpacity: 0.5, strokeWidth: 3, fillColor: '#0000ff', fillOpacity: 0.2};
-    var button = new ymaps.control.Button({data: {content: 'Режим выделеия'}, options: {maxWidth: 150}});
+    var button = new ymaps.control.Button({data: {content: 'Режим выделеия', title: "Можно также зажать alt!"},
+        options: {maxWidth: 150}});
     map.controls.add(button);
 
     map.events.add('mousedown', function (e) {
