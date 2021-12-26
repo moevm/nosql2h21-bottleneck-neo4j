@@ -1,7 +1,7 @@
+import random
 from typing import Dict, List
 from neo4j import GraphDatabase
-from datetime import datetime
-import time
+
 
 class Neo4jProvider():
     def __init__(self, uri, user, password):
@@ -39,7 +39,15 @@ class Neo4jProvider():
             
             return session.write_transaction(self.__createLine, id, lanes, maxSpeed, line["nodes"])
 
+    def getLine(self, line: Dict):
+        with self.driver.session() as session:
+            id = line["id"]
 
+            return session.write_transaction(self.__createLine, id)
+
+    @staticmethod
+    def __getLine(context, id:int):
+        context.run("")
 
     @staticmethod
     def __createPoint(context, id:int, lat: float, lon: float, isTrafficSignal: bool = False):
@@ -53,18 +61,20 @@ class Neo4jProvider():
 
     @staticmethod
     def __createLine(context, id:int, lanes: int, maxSpeed: int, nodes: List,):
-        context.run("MERGE (line:Line {id: $id, lanes: $lanes, maxSpeed: $maxSpeed}) "
-                    "ON MATCH "
-                    "   SET "
-                    "       line.lanes=$lanes, "
-                    "       line.maxSpeed=$maxSpeed ",
-                    id=id, lanes=lanes, maxSpeed=maxSpeed)
+        result = context.run("MERGE (line:Line {id: $id, lanes: $lanes, maxSpeed: $maxSpeed, load: $load}) "
+                             "ON MATCH "
+                             "   SET "
+                             "       line.lanes=$lanes, "
+                             "       line.maxSpeed=$maxSpeed, "
+                             "       line.load=$load "
+                             "RETURN line.load",
+                    id=id, lanes=lanes, maxSpeed=maxSpeed, load=random.random())
         points = []
         
         for pointId in nodes:
             points.append(list(Neo4jProvider.__addRelation(context, id, pointId)))
         
-        return points
+        return {"points": points, "load": result.single()}
             
     @staticmethod
     def __addRelation(context, lineId: int, pointId: int):
@@ -75,21 +85,4 @@ class Neo4jProvider():
                              "RETURN point.lat, point.lon",
                              pointId=pointId, lineId=lineId)
         return result.single()
-
-def writeRawGraph(provider, rawGraph):
-    lines = []
-
-    start_time = datetime.now()
-
-    for node in rawGraph["elements"]:
-            try:
-                if node["type"] == "node":
-                    provider.writePoint(node)
-                elif node["type"] == "way":
-                    lines.append(provider.writeLine(node))
-            except:
-                continue
-
-    print(datetime.now() - start_time)
     
-    return lines

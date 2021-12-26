@@ -1,4 +1,3 @@
-import overpass
 from flask import Flask, request
 from flask_cors import CORS
 import json
@@ -6,7 +5,6 @@ import bottleNeckFinder
 
 app = Flask(__name__)
 CORS(app)
-api = overpass.API()
 
 mapRequest = '(\
                 way\
@@ -16,31 +14,29 @@ mapRequest = '(\
                );'
 
 @app.route('/import', methods=['POST'])
-def getByPolygon():
+async def importByPolygon():
     try:
         data = json.loads(request.get_data())
         points = []
         if(data):
             points = ["%f %f" % tuple(point) for point in data]
-        
-        rawGraph = api.get(mapRequest % {"poly": (" ").join(points)}, verbosity='tags body',
-                           responseformat="json")
-        return json.dumps(bottleNeckFinder.graduateLines(rawGraph), ensure_ascii=False), 200
+
+        bottleNeckFinder.graduateLines(points)
+        return "Success", 200
     except Exception as e:
         print(e)
         return "", 400
 
 @app.route('/polygon', methods=['POST'])
-def getByPolygon():
+async def getByPolygon():
     try:
         data = json.loads(request.get_data())
         points = []
         if(data):
             points = ["%f %f" % tuple(point) for point in data]
-        
-        rawGraph = api.get(mapRequest % {"poly": (" ").join(points)}, verbosity='tags body',
-                           responseformat="json")
-        return json.dumps(bottleNeckFinder.getVerdict(rawGraph), ensure_ascii=False), 200
+
+        result = bottleNeckFinder.getVerdict(points)
+        return json.dumps(result, ensure_ascii=False), 200
     except Exception as e:
         print(e)
         return "", 400
