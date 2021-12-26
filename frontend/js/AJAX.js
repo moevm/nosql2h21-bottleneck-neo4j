@@ -46,8 +46,8 @@ function SendRequest(r_method, r_path, r_args, r_handler)
             }
             else
             {
-                console.log("Error:", Request.status);
-                alert("Error! Error code:", Request.status)
+                console.log("Error: ", Request.status);
+                alert("Error! Error code: ", Request.status)
             }
         }
         else

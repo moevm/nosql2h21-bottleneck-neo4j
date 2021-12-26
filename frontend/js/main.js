@@ -1,6 +1,6 @@
 ymaps.ready(['ext.paintOnMap']).then(function () {
     var map = new ymaps.Map('map', {
-        center: [55.75, 37.62],
+        center: [59.93, 30.31],
         zoom: 14,
         controls: ["zoomControl", 'trafficControl', 'geolocationControl', "searchControl"]
     });
@@ -10,6 +10,9 @@ ymaps.ready(['ext.paintOnMap']).then(function () {
     var button = new ymaps.control.Button({data: {content: 'Режим выделеия', title: "Можно также зажать alt!"},
         options: {maxWidth: 150}});
     map.controls.add(button);
+    var import_button = new ymaps.control.Button({data: {content: 'ВКЛ импорт данных', title: "Можно также зажать alt!"},
+        options: {maxWidth: 150}});
+    map.controls.add(import_button);
 
     map.events.add('mousedown', function (e) {
         if (e.get('altKey') || button.isSelected()) {
@@ -35,6 +38,13 @@ ymaps.ready(['ext.paintOnMap']).then(function () {
             var JSON_COORDS = JSON.stringify(COORD);
             map.geoObjects.removeAll();
             map.geoObjects.add(geoObject);
+
+            if(import_button.isSelected()){
+                ImportInPolygonData(JSON_COORDS, function(Response) {
+                    console.log(Response.status);
+                })
+            }
+
             GetBottlenecks(JSON_COORDS, function(Response){
                 console.log(Response.responseText);
                 var json = JSON.parse(Response.responseText);
