@@ -42,22 +42,36 @@ ymaps.ready(['ext.paintOnMap']).then(function () {
             if(import_button.isSelected()){
                 ImportInPolygonData(JSON_COORDS, function(Response) {
                     console.log(Response.status);
+                    GetBottlenecks(JSON_COORDS, function(Response2){
+                        console.log(Response2.responseText);
+                        var json = JSON.parse(Response2.responseText);
+                        for(var i = 0; i < json.length; i++){
+                            console.log(JSON.stringify(json[i]["points"]));
+                            var polyline = new ymaps.Polyline(json[i]["points"], {}, {
+                                strokeWidth: 5,
+                                strokeColor: perc2color(100 - (json[i]["load"] * 100)),
+                                opacity: 0.5
+                            });
+                            map.geoObjects.add(polyline);
+                        }
+                    })
                 })
             }
-
-            GetBottlenecks(JSON_COORDS, function(Response){
-                console.log(Response.responseText);
-                var json = JSON.parse(Response.responseText);
-                for(var i = 0; i < json.length; i++){
-                    console.log(JSON.stringify(json[i]["points"]));
-                    var polyline = new ymaps.Polyline(json[i]["points"], {}, {
-                        strokeWidth: 5,
-                        strokeColor: perc2color(100 - (json[i]["load"] * 100)),
-                        opacity: 0.5
-                    });
-                    map.geoObjects.add(polyline);
-                }
-            })
+            else{
+                GetBottlenecks(JSON_COORDS, function(Response){
+                    console.log(Response.responseText);
+                    var json = JSON.parse(Response.responseText);
+                    for(var i = 0; i < json.length; i++){
+                        console.log(JSON.stringify(json[i]["points"]));
+                        var polyline = new ymaps.Polyline(json[i]["points"], {}, {
+                            strokeWidth: 5,
+                            strokeColor: perc2color(100 - (json[i]["load"] * 100)),
+                            opacity: 0.5
+                        });
+                        map.geoObjects.add(polyline);
+                    }
+                })
+            }
         }
     });
 
