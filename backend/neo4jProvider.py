@@ -53,12 +53,12 @@ class Neo4jProvider():
 
         context.run("match (l:Line)-[:contains]->(p:Point) "
                     "where p.isTrafficSignal = true "
-                    "set l.load = l.load + $weight", weight=0.5)
+                    "set l.load = l.load + $weight", weight=0.1)
         
-        context.run("match (l1:Line)-[:contains]->(p:Point)" 
-                    " match (p)-[:included]->(l2:Line)"
-                    "where l1.id <> l2.id and l1.lanes <> l2.lanes"
-                    "set l1.id = l1.id + $weight, l2.id = l2.id + $weight", weight=0.5)
+        context.run("match (l1:Line)-[:contains]->(p:Point) "
+                    "match (p)-[:included]->(l2:Line) "
+                    "where l1.id <> l2.id and l1.lanes > l2.lanes "
+                    "set l1.load = l1.load + $weight", weight=0.4)
 
     def writeLine(self, line: Dict):
         with self.driver.session() as session:
