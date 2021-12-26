@@ -47,13 +47,13 @@ class Neo4jProvider():
 
     @staticmethod
     def __getLine(context, id:int):
-        results = context.run("MATCH (line:Line {id:$id})-[:contains]->(point:Point)"
-                              "RETURN line.load, point.lat, point.lon", id=id)
+        results = context.run("MATCH (line:Line {id:$id})-[rel:contains]->(point:Point)"
+                              "RETURN rel.number, line.load, point.lat, point.lon", id=id)
         points = []
         load = 0
-        for point in results:
-            points.append(list(point[1::]))
-            load = point[0]
+        for point in sorted(list(results)):
+            points.append(list(point[2::]))
+            load = point[1]
 
         if len(points) > 0:
             return {"points": points, "load": load}
@@ -82,19 +82,21 @@ class Neo4jProvider():
                     id=id, lanes=lanes, maxSpeed=maxSpeed, load=random.random())
         points = []
         
+        number = 0
         for pointId in nodes:
-            points.append(list(Neo4jProvider.__addRelation(context, id, pointId)))
+            points.append(list(Neo4jProvider.__addRelation(context, id, pointId, number)))
+            number += 1
         
         return {"points": points, "load": result.single()}
             
     @staticmethod
-    def __addRelation(context, lineId: int, pointId: int):
+    def __addRelation(context, lineId: int, pointId: int, number: int):
         result = context.run("MATCH (point:Point {id: $pointId}), "
                              "      (line:Line {id: $lineId}) "
                              "MERGE (point)-[:included]->(line) "
-                             "MERGE (line)-[:contains]->(point) "
+                             "MERGE (line)-[:contains {number:$number}]->(point) "
                              "RETURN point.lat, point.lon",
-                             pointId=pointId, lineId=lineId)
+                             pointId=pointId, lineId=lineId, number=number)
 
         return result.single()
     
