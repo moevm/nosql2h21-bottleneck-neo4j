@@ -1,1 +1,0 @@
-# nosql2h21-bottleneck-neo4j
