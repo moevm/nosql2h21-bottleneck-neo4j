@@ -35,19 +35,20 @@ def writeRawGraph(rawGraph):
     lines = []
 
     for node in rawGraph["elements"]:
-            try:
-                if node["type"] == "node":
-                    provider.writePoint(node)
-                elif node["type"] == "way":
-                   lines.append(provider.writeLine(node))
-            except:
-                continue
+        try:
+            if node["type"] == "node":
+                provider.writePoint(node)
+            elif node["type"] == "way":
+                lines.append(provider.writeLine(node))
+        except:
+            continue
 
+    provider.updateLoad()
     print("%s consumed to write %d lines" % (datetime.now() - start_time, len(lines)))
 
     return lines
     
-def writeAndGetLines(nodeIds):
+def writeLines(nodeIds):
     mapRequest = '(\
                 way(id:%s);\
                 node(w);\
@@ -64,18 +65,18 @@ def getGraduation(rawGraph):
     start_time = datetime.now()
 
     for node in rawGraph["elements"]:
-            try:
-                line = provider.getLine(node)
-                if line:
-                    lines.append(line)
-                else:
-                    linestoWrite.append(str(node["id"]))
-            except:
-                continue
+        if not provider.haveLine(node):
+            linestoWrite.append(str(node["id"]))
 
-    print("%s consumed to read %d lines" % (datetime.now() - start_time, len(lines)))
 
     if len(linestoWrite) > 0:
-        lines.extend(writeAndGetLines(linestoWrite))
+        writeLines(linestoWrite)
+
+    start_time = datetime.now()
+
+    for node in rawGraph["elements"]:
+        lines.append(provider.getLine(node))
+
+    print("%s consumed to read %d lines" % (datetime.now() - start_time, len(lines)))
     
     return lines
