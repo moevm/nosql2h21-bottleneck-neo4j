@@ -50,7 +50,7 @@ class Neo4jProvider():
     def __updateLoad(context):
         context.run("match (l:Line)-[:contains]->(p:Point) "
                     "where p.isTrafficSignal = true "
-                    "set l.load = $load", 0.5)
+                    "set l.load = $load", load=0.5)
 
     def writeLine(self, line: Dict):
         with self.driver.session() as session:
