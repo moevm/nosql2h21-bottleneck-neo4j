@@ -6,6 +6,8 @@ from neo4j import GraphDatabase
 class Neo4jProvider():
     def __init__(self, uri, user, password):
         self.driver = GraphDatabase.driver(uri, auth=(user, password))
+        if(not self.driver):
+            print("Can't connect to the database")
 
     def __del__(self):
         self.driver.close()
@@ -37,7 +39,7 @@ class Neo4jProvider():
         result = context.run("MATCH (line:Line {id:$id})"
                               "RETURN line.id", id=id)
 
-        if len(result.single()) > 0:
+        if result.single():
             return True
         else:
             return False

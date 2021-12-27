@@ -1,0 +1,40 @@
+version: '3'
+services:
+  database:
+    restart: always
+    image: neo4j:4.2.3
+    container_name: database-neo4j
+    volumes: 
+      - ./database/neo4j/data:/data
+      - ./database/neo4j/var/lib/neo4j/conf:/var/lib/neo4j/conf
+      - ./database/neo4j/logs:/logs
+      - ./database/neo4j/var/lib/neo4j/import:/var/lib/neo4j/import
+      - ./database/neo4j/plugins:/plugins
+    environment:
+      - NEO4J_AUTH=neo4j/123
+  
+  backend:
+    build: ./backend
+    container_name: backend-flask
+    environment:
+      - PYTHONUNBUFFERED=True                   
+    restart: always
+    volumes:
+      - ./backend:/backend
+    ports:
+      - "5000:5000"
+    depends_on:
+      - database
+    command: ["python3", "app.py"]
+  
+  frontend:
+    build: ./frontend
+    container_name: frontend-nginx                
+    restart: always
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    command: ["nginx", "-g", "daemon off;"]
