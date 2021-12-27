@@ -1,10 +1,11 @@
 from flask import Flask, request
 from flask_cors import CORS
 import json
-import bottleNeckFinder
+from bottleNeckFinder import BottleneckFinder
 
 app = Flask(__name__)
 CORS(app)
+bottleNeckFinder = BottleneckFinder()
 
 @app.route('/import', methods=['POST'])
 async def importByPolygon():
@@ -35,4 +36,5 @@ async def getByPolygon():
         return "", 400
 
 if __name__ == "__main__":
-    app.run(host="26.101.20.117", port=8080, debug=True)
+    bottleNeckFinder.connectDB("bolt://database:7687", "neo4j", "123")
+    app.run(host="0.0.0.0", port=5000, debug=True)
